@@ -15,6 +15,10 @@
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 	<link href="css/tiny-slider.css" rel="stylesheet">
 	<link href="css/style.css" rel="stylesheet">
+
+	<!-- SweetAlert2 -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 	<title>NgoPag by Choi.std </title>
 
 	<style>
@@ -127,7 +131,7 @@
 <body>
 
 	<!-- Start Header/Navigation -->
-	<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+	<nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
 
 		<div class="container">
 			<a class="navbar-brand" href="index.html">NgoPag<span>.co</span></a>
@@ -356,7 +360,8 @@
 				<div class="col-lg-8">
 					<div class="lead-form-container animate-fade-in"
 						style="background: transparent; box-shadow: none; padding: 0;">
-						<h3 class="lead-form-title" style="text-align: left; color: #3b5d50;">Hubungi Kami</h3>
+						<h3 class="lead-form-title" style="text-align: left; color: #3b5d50;">Form Pemesanan &
+							Konsultasi</h3>
 						<form id="leadForm" onsubmit="handleLeadSubmit(event)">
 							<div class="row g-3">
 								<div class="col-md-6">
@@ -367,13 +372,26 @@
 								</div>
 								<div class="col-md-6">
 									<div class="form-group mb-0">
-										<input type="text" id="message" class="form-control" placeholder="Pesan Anda"
+										<input type="tel" id="whatsapp" class="form-control" placeholder="No. WhatsApp"
 											required style="border: 2px solid #3b5d50;">
+									</div>
+								</div>
+								<div class="col-12">
+									<div class="form-group mb-0">
+										<input type="text" id="address" class="form-control"
+											placeholder="Alamat Domisili" required style="border: 2px solid #3b5d50;">
+									</div>
+								</div>
+								<div class="col-12">
+									<div class="form-group mb-0">
+										<textarea id="message" class="form-control" rows="3"
+											placeholder="Pesan / Detail Pesanan" required
+											style="border: 2px solid #3b5d50;"></textarea>
 									</div>
 								</div>
 								<div class="col-auto">
 									<button type="submit" class="btn btn-primary">
-										<i class="fas fa-paper-plane me-2"></i> Kirim
+										<i class="fab fa-whatsapp me-2"></i> Kirim ke WhatsApp
 									</button>
 								</div>
 							</div>
@@ -433,52 +451,73 @@
 	<script src="js/bootstrap.bundle.min.js"></script>
 	<script src="js/tiny-slider.js"></script>
 	<script src="js/custom.js"></script>
-	<!-- Success Popup -->
-	<div id="popup-overlay">
-		<div class="popup-content">
-			<div class="popup-icon">
-				<i class="fas fa-check"></i>
-			</div>
-			<h3 class="popup-title">Berhasil!</h3>
-			<p class="popup-message">Pesan Anda telah kami terima. Silahkan lanjutkan ke WhatsApp untuk respon lebih
-				cepat.</p>
-			<a href="#" id="whatsapp-redirect-btn" class="popup-btn" target="_blank">
-				<i class="fab fa-whatsapp"></i> Lanjut ke WhatsApp
-			</a>
-		</div>
-	</div>
-
 	<script>
+		// Auto-Show Promo Popup (2 seconds delay)
+		window.onload = function () {
+			setTimeout(function () {
+				Swal.fire({
+					title: '<strong>Selamat Datang di NgoPag!</strong>',
+					icon: 'info',
+					html:
+						'Dapatkan penawaran spesial untuk <b>Kopi Gayo Wine</b> hari ini. ' +
+						'<br/><br/>' +
+						'<small>Stok terbatas, pesan sekarang!</small>',
+					showCloseButton: true,
+					showCancelButton: true,
+					focusConfirm: false,
+					confirmButtonText: '<i class="fa fa-thumbs-up"></i> Pesan Sekarang!',
+					confirmButtonAriaLabel: 'Thumbs up, great!',
+					cancelButtonText: 'Nanti Saja',
+					confirmButtonColor: '#3b5d50',
+					cancelButtonColor: '#d33'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						document.querySelector('#leadForm').scrollIntoView({ behavior: 'smooth' });
+					}
+				});
+			}, 2000); // 2000ms = 2 seconds
+		};
+
+		// Handle Form Submit
 		function handleLeadSubmit(event) {
 			event.preventDefault();
 
 			const name = document.getElementById('name').value;
+			const whatsapp = document.getElementById('whatsapp').value;
+			const address = document.getElementById('address').value;
 			const message = document.getElementById('message').value;
 
-			if (name && message) {
+			if (name && whatsapp && address && message) {
 				// Construct WhatsApp URL
-				const phoneNumber = "6287829383526"; // Your number
-				const text = `Halo NgoPag, nama saya ${name}. ${message}`;
-				const encodedText = encodeURIComponent(text);
-				const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+				const adminNumber = "6287829383526"; // Your number
+				const text = `Halo NgoPag, saya ingin memesan/konsultasi.%0A%0A` +
+					`*Nama:* ${name}%0A` +
+					`*No WA:* ${whatsapp}%0A` +
+					`*Alamat:* ${address}%0A` +
+					`*Pesan:* ${message}`;
 
-				// Set URL to button
-				document.getElementById('whatsapp-redirect-btn').href = whatsappUrl;
+				const whatsappUrl = `https://wa.me/${adminNumber}?text=${text}`;
 
-				// Show Popup
-				document.getElementById('popup-overlay').classList.add('active');
-
-				// Optional: Clear form
-				// event.target.reset();
+				// Show Success Alert with SweetAlert2
+				Swal.fire({
+					title: 'Siap Mengirim!',
+					text: "Anda akan diarahkan ke WhatsApp untuk mengirim detail pesanan.",
+					icon: 'success',
+					showCancelButton: true,
+					confirmButtonColor: '#25D366',
+					cancelButtonColor: '#d33',
+					confirmButtonText: 'Lanjut ke WhatsApp'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						window.open(whatsappUrl, '_blank');
+						// Optional: Reset form
+						event.target.reset();
+					}
+				});
+			} else {
+				Swal.fire('Mohon Lengkapi!', 'Semua kolom wajib diisi.', 'warning');
 			}
 		}
-
-		// Close popup when clicking outside
-		document.getElementById('popup-overlay').addEventListener('click', function (e) {
-			if (e.target === this) {
-				this.classList.remove('active');
-			}
-		});
 	</script>
 </body>
 
